@@ -634,7 +634,20 @@ function runPipeline() {
   const sredFinal = keptPx ? finalRedSupported / keptPx : 0;
   el('metaOverlay').innerHTML = `連通元件：總 ${comps.total} 個，保留 ${comps.kept} 個 ｜ 最終髮絲像素：${keptPx} ｜ Sred(final) = ${(sredFinal*100).toFixed(1)}% ｜ min area = ${el('minArea').value}, min aspect = ${Number(el('minAspect').value).toFixed(1)}`;
 
-  el('summaryBox').innerHTML = `<b>目前判讀：</b>這版預設會先用 ROI 限制在蘋果上，再用 <b>${el('channelMode').selectedOptions[0].textContent}</b> 強化紅色資訊，透過 <b>背景移除 + ${el('enhanceMode').selectedOptions[0].textContent}</b> 壓掉大面積光照，再用 <b>垂直亮線回應</b> 突出近似垂直的髮絲，並加入 <b>Sred 紅色支持度</b> 排除白色反光、黑色蒂頭與非紅色邊界。Sred(candidate) 目前為 <b>${(sredCandidate*100).toFixed(1)}%</b>，Sred(final) 為 <b>${(sredFinal*100).toFixed(1)}%</b>。若結果還抓到很多背景，先縮小 ROI；若髮絲太少，將 gradient percentile 調到 85% 或降低 min aspect；若反光與蒂頭太多，將 Sred percentile 提高。`;;
+  el('summaryBox').innerHTML = `<b>目前判讀：</b>這版預設會先用 ROI 限制在蘋果上，再用 <b>${el('channelMode').selectedOptions[0].textContent}</b> 強化紅色資訊，透過 <b>背景移除 + ${el('enhanceMode').selectedOptions[0].textContent}</b> 壓掉大面積光照，再用 <b>垂直亮線回應</b> 突出近似垂直的髮絲，並加入 <b>Sred 紅色支持度</b> 排除白色反光、黑色蒂頭與非紅色邊界。Sred(candidate) 目前為 <b>${(sredCandidate*100).toFixed(1)}%</b>，Sred(final) 為 <b>${(sredFinal*100).toFixed(1)}%</b>。若結果還抓到很多背景，先縮小 ROI；若髮絲太少，將 gradient percentile 調到 85% 或降低 min aspect；若反光與蒂頭太多，將 Sred percentile 提高。`;
+
+  const ms = Math.round(performance.now() - t0);
+  setStatus(`完成 run #${runCount}，耗時 ${ms} ms`);
+  } catch (err) {
+    console.error(err);
+    setStatus('計算錯誤：' + (err && err.message ? err.message : err));
+  } finally {
+    isRunning = false;
+    if (rerunPending) {
+      rerunPending = false;
+      scheduleRun(80);
+    }
+  }
 }
 </script>
 </body>
